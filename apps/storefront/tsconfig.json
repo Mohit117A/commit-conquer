@@ -15,7 +15,8 @@
       "@/*": ["./*"]
     },
     "strict": false,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "types": ["vite/client"]
   },
   "include": ["./**/*.ts", "./**/*.tsx", "./**/*.js", "./**/*.jsx"],
   "exclude": ["node_modules", "dist", "vite.config.ts"],

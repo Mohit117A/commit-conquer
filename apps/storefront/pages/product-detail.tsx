@@ -9,15 +9,15 @@ import CartDrawer from "../CartDrawer";
 const API = "/api/store";
 
 async function fetchProduct(handle: string) {
-  
+
   try {
     const res = await fetch(`${API}/products/handle/${handle}`);
     if (res.ok) {
       const data = await res.json();
       return data.product;
     }
-  } catch {}
-  
+  } catch { }
+
   return {
     id: `prod_demo`,
     handle,
@@ -33,9 +33,9 @@ async function fetchProduct(handle: string) {
     thumbnail: `https://picsum.photos/seed/${handle}1/600/750`,
     price: 7900,
     variants: [
-      { id: "var_s",  title: "S",  inventory: 5 },
-      { id: "var_m",  title: "M",  inventory: 12 },
-      { id: "var_l",  title: "L",  inventory: 8 },
+      { id: "var_s", title: "S", inventory: 5 },
+      { id: "var_m", title: "M", inventory: 12 },
+      { id: "var_l", title: "L", inventory: 8 },
       { id: "var_xl", title: "XL", inventory: 0 },
     ],
     tags: ["new"],
@@ -46,8 +46,8 @@ async function fetchProduct(handle: string) {
 
 export default function ProductDetail() {
   const { handle } = useParams<{ handle: string }>();
-  const dispatch   = useCartDispatch() as any;
-  const navigate   = useNavigate();
+  const dispatch = useCartDispatch() as any;
+  const navigate = useNavigate();
 
   const { data: product, isLoading, error } = useQuery({
     queryKey: ["product", handle],
@@ -56,9 +56,9 @@ export default function ProductDetail() {
   });
 
   const [selectedVariant, setSelectedVariant] = useState<string | null>(null);
-  const [imgIdx, setImgIdx]     = useState(0);
-  const [toast, setToast]       = useState<string | null>(null);
-  const [qty, setQty]           = useState(1);
+  const [imgIdx, setImgIdx] = useState(0);
+  const [toast, setToast] = useState<string | null>(null);
+  const [qty, setQty] = useState(1);
 
   const addToCart = () => {
     if (!product) return;
@@ -66,13 +66,13 @@ export default function ProductDetail() {
     dispatch?.({
       type: "ADD_ITEM",
       payload: {
-        id:        product.id,
+        id: product.id,
         variantId: variant?.id ?? "default",
-        title:     product.title,
-        price:     (product.price ?? 0) / 100,
+        title: product.title,
+        price: (product.price ?? 0) / 100,
         thumbnail: product.thumbnail,
-        size:      variant?.title,
-        quantity:  qty,
+        size: variant?.title,
+        quantity: qty,
       },
     });
     dispatch?.({ type: "TOGGLE_CART", payload: true });
@@ -88,7 +88,7 @@ export default function ProductDetail() {
   );
 
   const images = product.images?.length ? product.images : [{ url: product.thumbnail, alt: product.title }];
-  const price  = (product.price ?? 0) / 100;
+  const price = (product.price ?? 0) / 100;
   const variant = product.variants?.find((v: any) => v.id === selectedVariant) ?? null;
   const inStock = variant ? variant.inventory > 0 : true;
 
@@ -96,7 +96,7 @@ export default function ProductDetail() {
     <div style={s.page}>
       <style>{css}</style>
 
-      
+
       <nav style={s.breadcrumb}>
         <Link to="/" style={s.bcLink}>Shop</Link>
         <span style={{ color: "#555" }}>›</span>
@@ -127,7 +127,7 @@ export default function ProductDetail() {
           )}
         </div>
 
-        
+
         <div style={s.info}>
           <div style={{ display: "flex", gap: 8, marginBottom: 12, flexWrap: "wrap" }}>
             {product.tags?.map((t: string) => (
@@ -147,7 +147,7 @@ export default function ProductDetail() {
 
           <p style={s.desc}>{product.description}</p>
 
-          
+
           {product.variants?.length > 0 && (
             <div style={{ marginBottom: 24 }}>
               <p style={s.label}>Size</p>
@@ -174,7 +174,7 @@ export default function ProductDetail() {
             </div>
           )}
 
-          
+
           <div style={{ marginBottom: 24 }}>
             <p style={s.label}>Quantity</p>
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -184,7 +184,7 @@ export default function ProductDetail() {
             </div>
           </div>
 
-          
+
           <button
             onClick={addToCart}
             disabled={!inStock}
@@ -227,28 +227,28 @@ const css = `
 `;
 
 const s: Record<string, any> = {
-  page:       { maxWidth: 1100, margin: "0 auto", padding: "24px 24px 60px" },
-  loader:     { padding: 60, textAlign: "center", color: "#888" },
+  page: { maxWidth: 1100, margin: "0 auto", padding: "24px 24px 60px" },
+  loader: { padding: 60, textAlign: "center", color: "#888" },
   breadcrumb: { display: "flex", gap: 10, alignItems: "center", marginBottom: 32, fontSize: 14 },
-  bcLink:     { color: "#7c6aff", textDecoration: "none" },
-  layout:     { display: "flex", gap: 48, alignItems: "flex-start", flexWrap: "wrap" },
+  bcLink: { color: "#7c6aff", textDecoration: "none" },
+  layout: { display: "flex", gap: 48, alignItems: "flex-start", flexWrap: "wrap" },
   imageSection: { flex: "0 0 480px", maxWidth: "100%" },
-  mainImage:  { borderRadius: 16, overflow: "hidden", background: "#141417", aspectRatio: "4/5", marginBottom: 12 },
-  mainImg:    { width: "100%", height: "100%", objectFit: "cover", display: "block" },
-  thumbRow:   { display: "flex", gap: 8 },
-  thumbBtn:   { width: 72, height: 88, borderRadius: 8, overflow: "hidden", cursor: "pointer", background: "#141417", flexShrink: 0 },
-  info:       { flex: 1, minWidth: 280 },
-  tag:        { fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: 20, background: "rgba(124,106,255,0.15)", color: "#7c6aff", textTransform: "uppercase" },
-  title:      { fontSize: 32, fontWeight: 800, marginBottom: 12, lineHeight: 1.2 },
-  ratingRow:  { color: "#f5a623", fontSize: 18, marginBottom: 12, display: "flex", alignItems: "center" },
-  price:      { fontSize: 28, fontWeight: 800, color: "#7c6aff", marginBottom: 20 },
-  desc:       { color: "#aaa", fontSize: 15, lineHeight: 1.7, marginBottom: 28 },
-  label:      { fontSize: 13, fontWeight: 700, color: "#888", textTransform: "uppercase", letterSpacing: 1, marginBottom: 10 },
-  sizeBtn:    { padding: "10px 16px", background: "#141417", color: "#e8e8f0", cursor: "pointer", borderRadius: 8, fontSize: 14, fontWeight: 600, minWidth: 52, textAlign: "center" },
-  qtyBtn:     { width: 36, height: 36, border: "1px solid #2a2a31", background: "#1c1c21", color: "#e8e8f0", cursor: "pointer", borderRadius: 8, fontSize: 18 },
-  addBtn:     { width: "100%", padding: "16px", background: "#7c6aff", color: "#fff", border: "none", borderRadius: 12, fontSize: 16, fontWeight: 700 },
-  buyNowBtn:  { flex: 1, padding: "14px", background: "#1c1c21", color: "#e8e8f0", border: "1px solid #2a2a31", borderRadius: 12, fontSize: 15, fontWeight: 600, cursor: "pointer" },
-  features:   { marginTop: 28, display: "flex", flexDirection: "column", gap: 10 },
+  mainImage: { borderRadius: 16, overflow: "hidden", background: "#141417", aspectRatio: "4/5", marginBottom: 12 },
+  mainImg: { width: "100%", height: "100%", objectFit: "cover", display: "block" },
+  thumbRow: { display: "flex", gap: 8 },
+  thumbBtn: { width: 72, height: 88, borderRadius: 8, overflow: "hidden", cursor: "pointer", background: "#141417", flexShrink: 0 },
+  info: { flex: 1, minWidth: 280 },
+  tag: { fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: 20, background: "rgba(124,106,255,0.15)", color: "#7c6aff", textTransform: "uppercase" },
+  title: { fontSize: 32, fontWeight: 800, marginBottom: 12, lineHeight: 1.2 },
+  ratingRow: { color: "#f5a623", fontSize: 18, marginBottom: 12, display: "flex", alignItems: "center" },
+  price: { fontSize: 28, fontWeight: 800, color: "#7c6aff", marginBottom: 20 },
+  desc: { color: "#aaa", fontSize: 15, lineHeight: 1.7, marginBottom: 28 },
+  label: { fontSize: 13, fontWeight: 700, color: "#888", textTransform: "uppercase", letterSpacing: 1, marginBottom: 10 },
+  sizeBtn: { padding: "10px 16px", background: "#141417", color: "#e8e8f0", cursor: "pointer", borderRadius: 8, fontSize: 14, fontWeight: 600, minWidth: 52, textAlign: "center" },
+  qtyBtn: { width: 36, height: 36, border: "1px solid #2a2a31", background: "#1c1c21", color: "#e8e8f0", cursor: "pointer", borderRadius: 8, fontSize: 18 },
+  addBtn: { width: "100%", padding: "16px", background: "#7c6aff", color: "#fff", border: "none", borderRadius: 12, fontSize: 16, fontWeight: 700 },
+  buyNowBtn: { flex: 1, padding: "14px", background: "#1c1c21", color: "#e8e8f0", border: "1px solid #2a2a31", borderRadius: 12, fontSize: 15, fontWeight: 600, cursor: "pointer" },
+  features: { marginTop: 28, display: "flex", flexDirection: "column", gap: 10 },
   featureRow: { display: "flex", gap: 10, alignItems: "center" },
-  toast:      { position: "fixed", bottom: 24, left: "50%", transform: "translateX(-50%)", background: "#3ddc97", color: "#0c0c0e", padding: "12px 24px", borderRadius: 10, fontWeight: 700, zIndex: 999, fontSize: 14 },
+  toast: { position: "fixed", bottom: 24, left: "50%", transform: "translateX(-50%)", background: "#3ddc97", color: "#0c0c0e", padding: "12px 24px", borderRadius: 10, fontWeight: 700, zIndex: 999, fontSize: 14 },
 };

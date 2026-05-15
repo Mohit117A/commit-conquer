@@ -8,6 +8,7 @@ import CartDrawer from "../CartDrawer";
 
 interface Product {
   id: string;
+  variantId?: string;
   handle: string;
   title: string;
   category: string;

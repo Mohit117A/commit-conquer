@@ -209,7 +209,7 @@ const SEED_PRODUCTS: Product[] = [
 
 
 
-const byId   = new Map<string, Product>(SEED_PRODUCTS.map((p) => [p.id, p]));
+const byId = new Map<string, Product>(SEED_PRODUCTS.map((p) => [p.id, p]));
 const byHandle = new Map<string, Product>(SEED_PRODUCTS.map((p) => [p.handle, p]));
 
 
@@ -237,13 +237,11 @@ export const ProductModel = {
   },
 
   search(query: string): Product[] {
-    const q = query.toLowerCase();
-    return [...byId.values()].filter(
-      (p) =>
-        p.title.toLowerCase().includes(q) ||
-        p.description?.toLowerCase().includes(q) ||
-        p.tags.some((t) => t.includes(q)),
-    );
+    const words = query.toLowerCase().trim().split(/\s+/);
+    return [...byId.values()].filter((p) => {
+      const searchableText = `${p.title} ${p.description} ${p.tags.join(' ')}`.toLowerCase();
+      return words.every(word => searchableText.includes(word));
+    });
   },
 
   create(data: Omit<Product, "id" | "handle" | "created_at" | "updated_at">): Product {
@@ -263,7 +261,7 @@ export const ProductModel = {
     const existing = byId.get(id);
     if (!existing) return undefined;
 
-    
+
     const newHandle =
       changes.title && changes.title !== existing.title
         ? toHandle(changes.title)
@@ -272,7 +270,7 @@ export const ProductModel = {
     const updated: Product = {
       ...existing,
       ...changes,
-      id,                              
+      id,
       handle: newHandle,
       updated_at: new Date().toISOString(),
     };
@@ -294,7 +292,7 @@ export const ProductModel = {
     return true;
   },
 
-  
+
 
   findVariant(productId: string, variantId: string): ProductVariant | undefined {
     return byId.get(productId)?.variants.find((v) => v.id === variantId);
@@ -303,7 +301,7 @@ export const ProductModel = {
   updateVariantInventory(
     productId: string,
     variantId: string,
-    delta: number,          
+    delta: number,
   ): ProductVariant | undefined {
     const product = byId.get(productId);
     if (!product) return undefined;
@@ -319,14 +317,14 @@ export const ProductModel = {
     return variant;
   },
 
-  
+
 
   stats() {
     const all = [...byId.values()];
     return {
-      total:     all.length,
+      total: all.length,
       published: all.filter((p) => p.status === "published").length,
-      draft:     all.filter((p) => p.status === "draft").length,
+      draft: all.filter((p) => p.status === "draft").length,
       out_of_stock: all.filter((p) =>
         p.variants.every((v) => v.inventory_quantity === 0),
       ).length,
@@ -346,7 +344,7 @@ function _variant(
   return {
     id: `var_${productId}_${size}_${color}`.toLowerCase().replace(/\s/g, "_"),
     title: `${size} / ${color}`,
-    sku:   `${productId}-${size}-${color}`.toUpperCase(),
+    sku: `${productId}-${size}-${color}`.toUpperCase(),
     price: priceCents,
     inventory_quantity: qty,
     options: { size, color },

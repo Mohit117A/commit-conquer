@@ -10,7 +10,10 @@
     "strict": false,
     "skipLibCheck": true,
     "noEmit": true,
-    "rootDir": "."
+    "rootDir": ".",
+    "types": [
+      "jest"
+    ]
   },
   "ts-node": {
     "transpileOnly": true,
@@ -22,5 +25,8 @@
     "infra/**/*.ts",
     "tests/**/*.ts"
   ],
-  "exclude": ["node_modules", "apps"]
+  "exclude": [
+    "node_modules",
+    "apps"
+  ]
 }

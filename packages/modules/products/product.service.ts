@@ -47,7 +47,7 @@ export interface UpdateProductInput {
 
 export const ProductService = {
 
-  
+
 
   list(input: ListProductsInput = {}): PaginatedResponse<Product> {
     const {
@@ -61,36 +61,18 @@ export const ProductService = {
 
     let products = ProductModel.findAll();
 
-    
+
     if (status !== "all") {
       products = products.filter((p) => p.status === status);
     }
 
-    
-    if (category && category !== "all") {
-      products = products.filter((p) => p.category === category);
-    }
-
-    
     if (search && search.trim()) {
-      const q = search.trim().toLowerCase();
-      products = products.filter(
-        (p) =>
-          p.title.toLowerCase().includes(q) ||
-          p.description?.toLowerCase().includes(q) ||
-          p.tags.some((t) => t.toLowerCase().includes(q)) ||
-          p.category?.toLowerCase().includes(q),
-      );
+      products = products.filter((p) => matchesSearch(p, search));
     }
-
-
     products = _sort(products, sort);
-
 
     return paginate(products, offset, limit);
   },
-
-  
 
   getById(id: string): Product {
     const product = ProductModel.findById(id);
@@ -107,41 +89,41 @@ export const ProductService = {
     return product;
   },
 
-  
+
 
   async create(input: CreateProductInput): Promise<Product> {
     _validateCreate(input);
 
     const product = ProductModel.create({
-      title:       input.title,
+      title: input.title,
       description: input.description ?? "",
-      thumbnail:   input.thumbnail ?? "",
-      images:      input.images ?? [],
-      status:      input.status ?? "draft",
-      category:    input.category ?? "",
-      tags:        input.tags ?? [],
-      variants:    input.variants.map((v) => ({
-        id:                 `var_${Math.random().toString(36).slice(2, 9)}`,
-        title:              v.title,
-        sku:                v.sku,
-        price:              v.price,
+      thumbnail: input.thumbnail ?? "",
+      images: input.images ?? [],
+      status: input.status ?? "draft",
+      category: input.category ?? "",
+      tags: input.tags ?? [],
+      variants: input.variants.map((v) => ({
+        id: `var_${Math.random().toString(36).slice(2, 9)}`,
+        title: v.title,
+        sku: v.sku,
+        price: v.price,
         inventory_quantity: v.inventory_quantity,
-        options:            v.options,
+        options: v.options,
       })),
     });
 
     await eventBus.emit(EVENT.PRODUCT_CREATED, {
       product_id: product.id,
-      title:      product.title,
+      title: product.title,
     });
 
     return product;
   },
 
-  
+
 
   async update(id: string, input: UpdateProductInput): Promise<Product> {
-    
+
     ProductService.getById(id);
 
     const changes = stripEmpty(input as Record<string, unknown>) as Partial<Product>;
@@ -153,13 +135,13 @@ export const ProductService = {
 
     await eventBus.emit(EVENT.PRODUCT_UPDATED, {
       product_id: id,
-      changes:    changes as Record<string, unknown>,
+      changes: changes as Record<string, unknown>,
     });
 
     return updated;
   },
 
-  
+
 
   async delete(id: string): Promise<{ deleted: string }> {
     ProductService.getById(id);   // throws if not found
@@ -175,7 +157,7 @@ export const ProductService = {
 
   async bulkDelete(ids: string[]): Promise<{ deleted: string[]; failed: string[] }> {
     const deleted: string[] = [];
-    const failed: string[]  = [];
+    const failed: string[] = [];
 
     for (const id of ids) {
       try {
@@ -221,15 +203,15 @@ export const ProductService = {
 
     await eventBus.emit(EVENT.INVENTORY_UPDATED, {
       variant_id: variantId,
-      quantity:   qty,
+      quantity: qty,
     });
 
     // Emit low-stock warning at threshold of 5
     if (qty > 0 && qty <= 5) {
       await eventBus.emit(EVENT.INVENTORY_LOW, {
         variant_id: variantId,
-        quantity:   qty,
-        threshold:  5,
+        quantity: qty,
+        threshold: 5,
       });
     }
 
@@ -243,7 +225,7 @@ export const ProductService = {
     return ProductModel.stats();
   },
 
-  
+
 
   categories(): string[] {
     const all = ProductModel.findAll();
@@ -263,7 +245,11 @@ export class ServiceError extends Error {
   }
 }
 
-
+export function matchesSearch(product: Product, search: string): boolean {
+  const queryWords = search.toLowerCase().trim().split(/\s+/);
+  const allProductData = JSON.stringify(product).toLowerCase();
+  return queryWords.every(word => allProductData.includes(word));
+}
 
 function _sort(products: Product[], sort: ListProductsInput["sort"]): Product[] {
   return [...products].sort((a, b) => {
