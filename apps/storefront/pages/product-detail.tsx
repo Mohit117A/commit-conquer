@@ -6,7 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useCartDispatch } from "../Layout";
 import CartDrawer from "../CartDrawer";
 
-const API = "/api/store";
+const API = "/api/v1/store";
 
 async function fetchProduct(handle: string) {
 
@@ -75,7 +75,7 @@ export default function ProductDetail() {
         quantity: qty,
       },
     });
-    dispatch?.({ type: "TOGGLE_CART", payload: true });
+    dispatch.toggleCart(true);
     setToast("Added to cart!");
     setTimeout(() => setToast(null), 2500);
   };
